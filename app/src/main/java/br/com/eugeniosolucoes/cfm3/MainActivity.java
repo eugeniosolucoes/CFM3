@@ -24,7 +24,6 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private final TextView txtWelcome = (TextView) findViewById(R.id.txtBemVindo);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +110,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initCFM() {
+        TextView txtWelcome = (TextView) findViewById(R.id.txtBemVindo);
         txtWelcome.setText(R.string.txt_welcome);
         TestAsyncTask testAsyncTask = new TestAsyncTask(MainActivity.this,
                 "http://www.eugeniosolucoes.com.br/cfm3.0/dados/json.php?comando=periodo&usuario=1&ano=2017&mes=6");
@@ -142,6 +142,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(String strings) {
             super.onPostExecute(strings);
+            TextView txtWelcome = (TextView) findViewById(R.id.txtBemVindo);
             txtWelcome.setText(strings.substring(0, 20));
         }
 
@@ -176,7 +177,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
             }
-            return null;
+            return "";
         }
     }
 }
