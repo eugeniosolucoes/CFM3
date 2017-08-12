@@ -1,5 +1,7 @@
 package br.com.eugeniosolucoes.cfm3;
 
+import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -14,8 +16,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private final TextView txtWelcome = (TextView) findViewById(R.id.txtBemVindo);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,8 +110,73 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void initCFM(){
-        TextView txt = (TextView) findViewById(R.id.txtBemVindo);
-        txt.setText("Bem-vindo");
+    private void initCFM() {
+        txtWelcome.setText(R.string.txt_welcome);
+        TestAsyncTask testAsyncTask = new TestAsyncTask(MainActivity.this,
+                "http://www.eugeniosolucoes.com.br/cfm3.0/dados/json.php?comando=periodo&usuario=1&ano=2017&mes=6");
+        testAsyncTask.execute();
+    }
+
+    class TestAsyncTask extends AsyncTask<Void, Void, String> {
+        private Context mContext;
+        private String mUrl;
+
+        public TestAsyncTask(Context context, String url) {
+            mContext = context;
+            mUrl = url;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            String resultString = null;
+            resultString = getJSON(mUrl);
+
+            return resultString;
+        }
+
+        @Override
+        protected void onPostExecute(String strings) {
+            super.onPostExecute(strings);
+            txtWelcome.setText(strings.substring(0, 20));
+        }
+
+        public String getJSON(String url) {
+            HttpURLConnection c = null;
+            try {
+                URL u = new URL(url);
+                c = (HttpURLConnection) u.openConnection();
+                c.connect();
+                int status = c.getResponseCode();
+                switch (status) {
+                    case 200:
+                    case 201:
+                        BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            sb.append(line + "\n");
+                        }
+                        br.close();
+                        return sb.toString();
+                }
+
+            } catch (Exception ex) {
+                return ex.toString();
+            } finally {
+                if (c != null) {
+                    try {
+                        c.disconnect();
+                    } catch (Exception ex) {
+                        //disconnect error
+                    }
+                }
+            }
+            return null;
+        }
     }
 }
